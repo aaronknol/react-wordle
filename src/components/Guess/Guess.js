@@ -1,19 +1,15 @@
 import React from "react";
+import { range } from "../../utils";
 import { checkGuess } from "../../game-helpers";
 
-function Guess({ guess, answer }) {
-  let letterArray = [];
-  for (var i = 0; i < 5; i++) {
-    letterArray[i] = guess
-      ? checkGuess(guess, answer)[i]
-      : { letter: "", status: "" };
-  }
-
-  return letterArray.map(({ letter, status }, index) => {
-    return (
-      <span className={`cell ${status}`} key={`guess-${index}`}>
-        {letter}
+function Guess({ guess }) {
+  return range(5).map((index) => {
+    return guess ? (
+      <span className={`cell ${guess[index].status}`} key={`guess-${index}`}>
+        {guess[index].letter}
       </span>
+    ) : (
+      <span className={`cell`} key={`guess-${index}`}></span>
     );
   });
 }

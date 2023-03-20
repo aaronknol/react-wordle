@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { range, sample } from "../../utils";
+import { sample } from "../../utils";
 import { WORDS } from "../../data";
 import GuessInput from "../GuessInput";
 import Guesses from "../Guesses/Guesses";
@@ -158,9 +158,11 @@ function Game() {
     setLetters(initialLetters);
   }
 
+  const checkedGuesses = guesses.map((guess) => checkGuess(guess, answer));
+
   return (
     <>
-      <Guesses guesses={guesses} answer={answer} />
+      <Guesses guesses={checkedGuesses} answer={answer} />
       <GuessInput
         handleSubmitGuess={handleSubmitGuess}
         disableInput={gameStatus !== "running"}
