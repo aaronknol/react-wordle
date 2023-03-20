@@ -121,46 +121,40 @@ function Game() {
     },
   ];
   const [answer, setAnswer] = useState(sample(WORDS));
-  const [guesses, setGuesses] = useState(range(NUM_OF_GUESSES_ALLOWED));
-  const [numOfGuesses, setNumOfGuesses] = useState(0);
-  const [guessWasCorrect, setGuessWasCorrect] = useState(false);
+  const [guesses, setGuesses] = useState([]);
+
+  const [gameStatus, setGameStatus] = useState("running");
 
   const [letters, setLetters] = useState([...initialLetters]);
-
   function handleSubmitGuess(guess) {
-    const nextGuesses = [...guesses];
-    nextGuesses[numOfGuesses] = guess;
+    let nextGuesses = [...guesses, guess];
+    setGuesses(nextGuesses);
+    guessedLetters(guess);
 
     if (guess === answer) {
-      setGuessWasCorrect(true);
+      setGameStatus("won");
+    } else if (nextGuesses.length >= NUM_OF_GUESSES_ALLOWED) {
+      setGameStatus("lost");
     }
-
-    setGuesses(nextGuesses);
-    setNumOfGuesses(numOfGuesses + 1);
-    guessedLetters(guess);
   }
 
   function guessedLetters(guess) {
     const checkedGuess = checkGuess(guess, answer);
 
-    letters.forEach((letter, index) => {
-      const target = checkedGuess.filter(
-        (checkedLetter) => checkedLetter.letter === letter.letter
+    checkedGuess.forEach((obj) => {
+      const theIndex = letters.findIndex(
+        (current) => current.letter === obj.letter
       );
-      if (target.length > 0) {
-        const nextLetters = [...letters];
-        nextLetters[index].status = target[0].status;
-        setLetters(nextLetters);
-      }
+      let newLetters = letters;
+      newLetters[theIndex] = obj;
+      setLetters(newLetters);
     });
   }
 
   function restartGame() {
     setAnswer(sample(WORDS));
-    setGuesses(range(NUM_OF_GUESSES_ALLOWED));
-    setNumOfGuesses(0);
-    setGuessWasCorrect(false);
-
+    setGuesses([]);
+    setGameStatus("running");
     setLetters(initialLetters);
   }
 
@@ -169,13 +163,15 @@ function Game() {
       <Guesses guesses={guesses} answer={answer} />
       <GuessInput
         handleSubmitGuess={handleSubmitGuess}
-        disableInput={guessWasCorrect}
+        disableInput={gameStatus !== "running"}
       />
-      {guessWasCorrect && (
+      {gameStatus === "won" && (
         <div className="happy banner">
           <p>
-            <strong>Congratulations!</strong> Got it in
-            <strong>3 guesses</strong>.
+            <strong>Congratulations!</strong> Got it in{" "}
+            <strong>
+              {guesses.length === 1 ? "1 guess" : `${guesses.length} guesses`}
+            </strong>
           </p>
           <button type="button" onClick={restartGame}>
             Play again
@@ -183,7 +179,7 @@ function Game() {
         </div>
       )}
 
-      {guesses.length === numOfGuesses && !guessWasCorrect && (
+      {gameStatus === "lost" && (
         <div className="sad banner">
           <p>
             Sorry, the correct answer is <strong>{answer}</strong>.
